@@ -9,8 +9,7 @@ Prerequisites:
     II) Change local and time zone to central
     III) Locate and enable ssh and camera
     IV) Exit out of configuration and reboot</pre> 
-3) Once restarted:<br /> 
-  a) 
+3) Go to a laptop
 
 Steps taken to install OpenCV using g++ and Cmake:
 
