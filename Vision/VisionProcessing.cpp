@@ -11,6 +11,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <stdio.h>
+#include <cstdint>
 //#include <thread>
 //#include <errno.h>
 //#include <fcntl.h>
@@ -37,6 +38,7 @@ Mat drawing;
 
 NetworkTableInstance nt_Inst;
 shared_ptr<NetworkTable> netTable; 	// X,Y,Z is the order for the coordinates
+NetworkTable *StartingNumber;
 int counter = 0;
 int index1 = 0;
 int index2 = 0;
@@ -80,6 +82,7 @@ double standard_height_p = 0;
 double pixel_per_in = 0;
 double pixel_per_degree = 0;
 
+
 double cube_center_x = 0;
 double cube_center_y = 0;
 
@@ -110,6 +113,7 @@ int main()
 	//nt_Inst.SetServer("10.12.59.2");
 	//nt_Inst.SetServer("roboRIO-1259-frc.local");
 	netTable = nt_Inst.GetTable("OpenCV");
+	netTable->GetEntry("visioncounter").ForceSetDouble(counter);
 	//netTable->GetEntry("visioncounter").Delete();
 	//cout<<netTable->GetEntry("visioncounter").Exists()<<endl;
 	//netTable->GetEntry("visioncounter").ClearPersistent();
@@ -117,7 +121,24 @@ int main()
 	//cvtColor(frame, image, COLOR_GRAY2RGB;
 	//image.convertTo(imageBrightness, -1, 1, 100);
 	
-	
+
+	double visioncounter = 0;
+	auto ntval = StartingNumber->GetValue("visioncounter");
+	if (ntval)
+	{
+		visioncounter = ntval->GetDouble();
+	}
+	//int OriginalNumberForNT = int (StartingNumber);
+	//OriginalNumberForNT = (int) StartingNumber;
+	if(visioncounter > 0)
+	{
+		counter = visioncounter;
+	}
+	else
+	{
+		counter = 0;
+	}
+
 	//Thresholds for HSV: better to identify yellow color
 	//const Scalar lower = Scalar(20, 190, 20);
 	//const Scalar upper = Scalar(30, 255, 255);
@@ -308,7 +329,8 @@ int main()
      			Vertical_Distance_Inch=0;
        			Forward_Distance_Inch =0;
 	   	}
-		netTable->GetEntry("visioncounter").ForceSetDouble(counter);
+
+		//counter = StartingNumber;
 //		double roboCounter = netTable->GetEntry("RoboCounter").GetDouble(0);
 		netTable->PutNumber("visioncounter", counter);
 //		netTable->PutNumber("Horizontal_Distance_Inch", Horizontal_Distance_Inch);
