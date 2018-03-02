@@ -38,7 +38,7 @@ Mat drawing;
 
 NetworkTableInstance nt_Inst;
 shared_ptr<NetworkTable> netTable; 	// X,Y,Z is the order for the coordinates
-NetworkTable *StartingNumber;
+//NetworkTable *StartingNumber;
 int counter = 0;
 int index1 = 0;
 int index2 = 0;
@@ -90,6 +90,8 @@ int main()
 {
 
 	nt_Inst = NetworkTableInstance::GetDefault();
+	nt_Inst.StartClientTeam(1259);
+	//sleep(2);
 	Camera.set(CV_CAP_PROP_GAIN, 10);
 	Camera.set(CV_CAP_PROP_EXPOSURE, 200);
 	//Camera.set(
@@ -109,11 +111,14 @@ int main()
 	//nt_Inst.StartClient();
     	//nt_Inst.SetServer("roboRIO-1259-frc.local");
 
-	nt_Inst.StartClientTeam(1259);
+	
+	
 	//nt_Inst.SetServer("10.12.59.2");
 	//nt_Inst.SetServer("roboRIO-1259-frc.local");
 	netTable = nt_Inst.GetTable("OpenCV");
-	netTable->GetEntry("visioncounter").ForceSetDouble(counter);
+	auto isconnected = nt_Inst.IsConnected();
+	cout<<"The network table is connected: "<<isconnected<<endl;
+	
 	//netTable->GetEntry("visioncounter").Delete();
 	//cout<<netTable->GetEntry("visioncounter").Exists()<<endl;
 	//netTable->GetEntry("visioncounter").ClearPersistent();
@@ -123,11 +128,23 @@ int main()
 	
 
 	double visioncounter = 0;
-	auto ntval = StartingNumber->GetValue("visioncounter");
+	auto Keys = netTable->GetKeys();
+	for (auto key: Keys)
+	{
+		cout<<"These are the keys: "<<key<<endl;
+	}
+	auto ntval = netTable->GetValue("visioncounter");
+
+
 	if (ntval)
 	{
 		visioncounter = ntval->GetDouble();
+		cout<<"The network for vision counter is: "<<visioncounter<<endl;
+
 	}
+	cout<<"The network for vision counter is: "<<visioncounter<<endl;
+
+	
 	//int OriginalNumberForNT = int (StartingNumber);
 	//OriginalNumberForNT = (int) StartingNumber;
 	if(visioncounter > 0)
@@ -300,7 +317,7 @@ int main()
 		}
 		else
 		{
-			cube_height = abs(contours[biggestContourLocation][index1].y - 
+			cube_height = abs(contours[biggestContourLocation][index1].y -  
 					  contours[biggestContourLocation][index2].y);
 		}
 
@@ -337,6 +354,7 @@ int main()
 //		netTable->PutNumber("Vertical_Distance_Inch", Vertical_Distance_Inch);
 //		netTable->PutNumber("Forward_Distance_Inch", Forward_Distance_Inch);
 		netTable->PutNumber("XOffAngle", Horizontal_Angle_Degree);
+		netTable->GetEntry("visioncounter").ForceSetDouble(counter);
 		//netTable->PutNumber("NetworkTableFirstValue", counter+42);
 
 		//cout<<"Counter is at: "<<counter<<endl;
