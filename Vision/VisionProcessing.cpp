@@ -12,14 +12,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <cstdint>
-//#include <thread>
-//#include <errno.h>
-//#include <fcntl.h>
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
 #include <stdint.h>
-//#include <atomic>
 #include <math.h>
 #include <cmath>
 
@@ -38,7 +34,7 @@ Mat drawing;
 
 NetworkTableInstance nt_Inst;
 shared_ptr<NetworkTable> netTable; 	// X,Y,Z is the order for the coordinates
-//NetworkTable *StartingNumber;
+
 int counter = 0;
 int index1 = 0;
 int index2 = 0;
@@ -61,12 +57,6 @@ double Vertical_Distance_Pixel = 0;
 double Horizontal_Distance_Inch = 0;
 double Vertical_Distance_Inch = 0;
 double Forward_Distance_Inch = 0;
-
-
-//VideoCapture cap(0);
-//Mat frame;
-
-//Mat imageBrightness;
 
 // Following settings is for camera calibrated value
 const double DEFAULT_FOV_ROW_NUM = 960;		// default = 960
@@ -91,42 +81,27 @@ int main()
 
 	nt_Inst = NetworkTableInstance::GetDefault();
 	nt_Inst.StartClientTeam(1259);
-	//sleep(2);
+
 	Camera.set(CV_CAP_PROP_GAIN, 10);
 	Camera.set(CV_CAP_PROP_EXPOSURE, 200);
-	//Camera.set(
 	cout<<"Vision has Started..."<<endl;
 	Camera.open();
 	cout<<"Camera is opened...\n";
-	//Camera.grab();
 	
 	// Warm up camera for 60 frames to stabilize image brightness
 	for (int loop = 0; loop<60 ; loop++)
 	{
 		Camera.grab();
-		//counter++;
 	}
 	Camera.retrieve(image);
 
-	//nt_Inst.StartClient();
-    	//nt_Inst.SetServer("roboRIO-1259-frc.local");
-
+	while(!nt_Inst.IsConnected())
+	{
+		sleep(0.1);
+	}
 	
-	
-	//nt_Inst.SetServer("10.12.59.2");
-	//nt_Inst.SetServer("roboRIO-1259-frc.local");
 	netTable = nt_Inst.GetTable("OpenCV");
-	auto isconnected = nt_Inst.IsConnected();
-	cout<<"The network table is connected: "<<isconnected<<endl;
 	
-	//netTable->GetEntry("visioncounter").Delete();
-	//cout<<netTable->GetEntry("visioncounter").Exists()<<endl;
-	//netTable->GetEntry("visioncounter").ClearPersistent();
-	//cap>>frame; //takes a frame
-	//cvtColor(frame, image, COLOR_GRAY2RGB;
-	//image.convertTo(imageBrightness, -1, 1, 100);
-	
-
 	double visioncounter = 0;
 	auto Keys = netTable->GetKeys();
 	for (auto key: Keys)
@@ -144,9 +119,6 @@ int main()
 	}
 	cout<<"The network for vision counter is: "<<visioncounter<<endl;
 
-	
-	//int OriginalNumberForNT = int (StartingNumber);
-	//OriginalNumberForNT = (int) StartingNumber;
 	if(visioncounter > 0)
 	{
 		counter = visioncounter;
@@ -178,12 +150,8 @@ int main()
 	int biggestContourLocation = 0;
 	int currentContourSize = 0;
 
-        double 	cube_height = 0;    	// cube height on image 
+	double 	cube_height = 0;    	// cube height on image 
 	double dx, dy, dz;		// distance in X, Y, Z between camera and cube
-	//	  namedWindow("inrange.bmp",WINDOW_AUTOSIZE);
-	//	  namedWindow("drawing.bmp", WINDOW_AUTOSIZE);
-	//	  namedWindow("image.bmp", WINDOW_AUTOSIZE);
-
 
 
 	while (true)
@@ -191,12 +159,8 @@ int main()
 
 		Camera.grab();
 
-		// Mat image = imread("./test_images/IMG_4415.JPG", CV_LOAD_IMAGE_COLOR);  // For debug
+		counter +=3;
 
-		//if(counter%2==0)
-			counter +=3;
-		//else
-		//	counter -=5;
 		Camera.retrieve(image);
 
 
@@ -266,7 +230,7 @@ int main()
 
 	        if (FISHEYE_CORR_FLAG == 1)
 		{
-        		// Apply distortion correction for fisheye camera to three sets of coordinates only to speed up calculation
+			// Apply distortion correction for fisheye camera to three sets of coordinates only to speed up calculation
 			x_original[0] = cube_center_x;
 			x_original[1] = cube_center_x;
 			x_original[2] = cube_center_x;
@@ -347,18 +311,11 @@ int main()
        			Forward_Distance_Inch =0;
 	   	}
 
-		//counter = StartingNumber;
-//		double roboCounter = netTable->GetEntry("RoboCounter").GetDouble(0);
-		netTable->PutNumber("visioncounter", counter);
-//		netTable->PutNumber("Horizontal_Distance_Inch", Horizontal_Distance_Inch);
-//		netTable->PutNumber("Vertical_Distance_Inch", Vertical_Distance_Inch);
-//		netTable->PutNumber("Forward_Distance_Inch", Forward_Distance_Inch);
-		netTable->PutNumber("XOffAngle", Horizontal_Angle_Degree);
-		netTable->GetEntry("visioncounter").ForceSetDouble(counter);
-		//netTable->PutNumber("NetworkTableFirstValue", counter+42);
 
-		//cout<<"Counter is at: "<<counter<<endl;
-		//cout<<"RoboRIO is at: "<<roboCounter<<endl;
+		netTable->PutNumber("visioncounter", counter);
+		netTable->PutNumber("XOffAngle", Horizontal_Angle_Degree);
+		//netTable->GetEntry("visioncounter").ForceSetDouble(counter);
+
 		  imwrite("inrange.bmp",inrange);
 //		  imshow("inrange.bmp",inrange);
 		  imwrite("drawing.bmp", drawing);
